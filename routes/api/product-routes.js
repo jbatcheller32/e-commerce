@@ -7,10 +7,11 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
 
   try {
-    const tagData = await Product.findAll({
-      include: [{ model: Category, model: Tag }],
+    const productData = await Product.findAll({
+      include: [{ model: Category, Tag, ProductTag }],
+
     });
-    res.status(200), json(tagData);
+    res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -20,11 +21,16 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
 
   try {
-    const tagData = await Product.findByPk(req.params.id, {
-      include: [{ model: Category, model: Tag }],
+    const productData = await Product.findByPk(req.params.id, {
+      include: [{ model: Category, Tag, ProductTag }],
     });
 
-    res.status(200).json(tagData);
+    if (!productData) {
+      res.status(404).json({ message: 'No product found' });
+      return;
+    }
+
+    res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -32,7 +38,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // create new product
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
+
   /* req.body should look like this...
     {
       product_name: "Basketball",
@@ -110,23 +117,23 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', async (req, res) => {
 
-  try { 
-    const tagData = await Product.delete(req.params.id, {
+  try {
+    const productData = await Product.destroy(req.params.id, {
       where: {
         id: req.params.id,
-      }, 
-    }); 
+      },
+    });
 
-    if(!tagData) {
+    if (!productData) {
       res.status(404).json({ message: 'No product with this id!' });
       return;
     }
 
-    res.status(200).json(tagData);
+    res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
   }
-    
+
 
 });
 
